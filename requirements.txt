@@ -1,0 +1,6 @@
+psycopg2-binary
+aiohttp
+python-dotenv
+
+fastapi>=0.109.1
+uvicorn>=0.29.0
