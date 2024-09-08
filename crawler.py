@@ -26,6 +26,7 @@ def connect_database():
         # Cur stores return object from queries
         cur = conn.cursor()
 
+        print("Database connected")
         return cur, conn
 
     except Exception as error:
@@ -38,6 +39,7 @@ def close_database_connection(conn, cur):
         cur.close()
     if conn is not None:
         conn.close()
+    print("Database connection closed")
 
 
 def init_database(cur, conn):
@@ -60,7 +62,9 @@ def init_database(cur, conn):
                                 crawled_at      TIMESTAMP
                             )'''
         
+        print("Creating memes table")
         cur.execute(memes_create_script)
+        print("Creating votes table")
         cur.execute(upvotes_create_script)
         conn.commit()
 
@@ -93,6 +97,7 @@ def insert_data(cur, conn, table, data_list, no_of_rows=TOP_N_MEME, ignore_confl
                             {"ON CONFLICT (name) DO NOTHING" if ignore_conflict else ""}'''
         
         # Exceute statement
+        print(f"Inserting data into {table} ...")
         cur.execute(insert_script, tuple([value for data in data_list for value in data]))
         
         return cur, conn
@@ -110,6 +115,7 @@ def delete_outdated_data(cur, conn):
         delete_script = f'''DELETE FROM votes
                             WHERE crawled_at < '{yesterday}\''''
         cur.execute(delete_script)
+        print("Deleted outdated data")
         return cur, conn
     
     except Exception as error:
@@ -126,6 +132,7 @@ async def get_top_memes():
     }
 
     try:
+        print("Fetching data from reddit ...")
         async with aiohttp.ClientSession() as session:
             async with session.get(url, params=params) as response:
                 data = await response.json()
@@ -166,5 +173,6 @@ async def main():
 
 
 if __name__ == '__main__':
+    print("Running crawler ...")
     asyncio.run(main())
 
