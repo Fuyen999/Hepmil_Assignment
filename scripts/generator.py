@@ -102,6 +102,7 @@ def url_formatter(string):
 def get_df_for_display(old_df):
     df = old_df.copy()
     df["net votes"] = df["upvotes"] - df["downvotes"]
+    df = df.sort_values("net votes", ascending=False)
     df["title"] = df.title.map(lambda title: format_emoji(title))
     df["url"] = df.url.map(lambda url: url_formatter(url))
     df["img_path"] = df[["name", "thumbnail_url"]].apply(get_full_img_path, axis=1)
@@ -146,7 +147,7 @@ def plot_time_series_graph(df):
     ylabels = [f'{x}k' for x in lineplot.get_yticks()/1000]
     lineplot.tick_params(axis='x', labelrotation=45)
     lineplot.set_yticklabels(ylabels)
-    lineplot.legend(title='Meme Title', loc='center left', bbox_to_anchor=(1.05, 0.5), ncol=1)
+    lineplot.legend(title=f'Meme Title{len(df_title_sorted_by_votes)}', loc='center left', bbox_to_anchor=(1.05, 0.5), ncol=1)
 
     fig = lineplot.get_figure()
     img_cache_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "img_cache")
@@ -205,7 +206,7 @@ async def generate_pdf_report():
     
     if os.path.exists(html_report_path):
         modified_seconds_ago = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(html_report_path))).total_seconds()
-        if os.path.exists(pdf_report_path) and modified_seconds_ago < 300:
+        if os.path.exists(pdf_report_path) and modified_seconds_ago < 1:
             return pdf_report_path
 
     await generate_html_report()
