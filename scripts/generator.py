@@ -160,7 +160,7 @@ def get_chart_html():
 
 
 async def generate_html_report():
-    newest_update()
+    await newest_update()
     engine = sqlalchemy_connect()
     top_memes_data = get_top_memes_data_from_db(engine)
     await cache_img(top_memes_data)
