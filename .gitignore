@@ -163,3 +163,4 @@ cython_debug/
 
 img_cache/
 reports/
+.DS_Store

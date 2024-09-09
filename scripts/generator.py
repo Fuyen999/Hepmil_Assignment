@@ -199,20 +199,23 @@ async def generate_pdf_report():
     reports_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "reports")
     html_report_path = os.path.join(reports_dir, "report.html")
     pdf_report_path = os.path.join(reports_dir, "report.pdf")
-    modified_seconds_ago = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(html_report_path))).total_seconds()
     
-    if not os.path.exists(html_report_path) or modified_seconds_ago > 180:
-        await generate_html_report()
+    if os.path.exists(html_report_path):
+        modified_seconds_ago = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(html_report_path))).total_seconds()
+        if os.path.exists(pdf_report_path) and modified_seconds_ago < 180:
+            return pdf_report_path
 
-        css = CSS(string='''
-            @page {size: A4; margin: 1cm;} 
-            .chart {width: 100%;}
-            th {text-align: center; border: 1px solid black;}
-            td {border: 1px solid black;}
-            ''')
-        HTML(html_report_path).write_pdf(pdf_report_path, stylesheets=[css])
-    
+    await generate_html_report()
+
+    css = CSS(string='''
+        @page {size: A4; margin: 1cm;} 
+        .chart {width: 100%;}
+        th {text-align: center; border: 1px solid black;}
+        td {border: 1px solid black;}
+        ''')
+    HTML(html_report_path).write_pdf(pdf_report_path, stylesheets=[css])
     return pdf_report_path
+    
 
 
 if __name__ == '__main__':
