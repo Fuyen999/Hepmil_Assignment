@@ -1,12 +1,14 @@
 from typing import Final
 import os
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from generator import generate_pdf_report
 
-load_dotenv()
-TOKEN: Final = os.getenv('BOT_TOKEN')
-BOT_USERNAME: Final = os.getenv('BOT_USERNAME')
+dotenv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
+config = dotenv_values(dotenv_path)
+TOKEN: Final = config['BOT_TOKEN']
+BOT_USERNAME: Final = config['BOT_USERNAME']
 
 ## Commands
 # Message when user press start button (when starting the bot)
@@ -19,9 +21,9 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Message when user uses /custom
 async def generate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    report_name = os.getenv("REPORT_NAME")
-    report = open(os.getenv("REPORT_NAME"), "rb")
-    await update.message.reply_document(report, caption=report_name)
+    pdf_report_path = await generate_pdf_report()
+    report = open(pdf_report_path, "rb")
+    await update.message.reply_document(report, caption="Top 20 memes report")
 
 
 ## Message handler

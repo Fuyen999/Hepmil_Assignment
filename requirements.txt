@@ -1,8 +1,14 @@
 psycopg2-binary
 aiohttp
 python-dotenv
+sqlalchemy
 
 python-telegram-bot
 
-fastapi>=0.109.1
-uvicorn>=0.29.0
+pandas
+seaborn
+jinja2
+aiofiles
+weasyprint
+pyemoji
+colorcet

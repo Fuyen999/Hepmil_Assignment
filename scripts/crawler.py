@@ -1,26 +1,33 @@
 import aiohttp
 import asyncio
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 import os
 import psycopg2
 from datetime import datetime, timedelta
+from sqlalchemy import create_engine
+from urllib.parse import quote_plus
 
 TOP_N_MEME = 20
+
+dotenv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
+config = dotenv_values(dotenv_path)
+HOSTNAME = config['HOSTNAME']
+DATABASE = config['DATABASE']
+USERNAME = config['USERNAME']
+PASSWORD = config['PASSWORD']
+PORT_ID = config['PORT_ID']
 
 def connect_database():
     cur = conn = None
 
     try:
-        # Load database related env variables
-        load_dotenv(override=True)
-
         # Connect to database
         conn = psycopg2.connect(
-            host = os.getenv('HOSTNAME'),
-            dbname = os.getenv('DATABASE'),
-            user = os.getenv('USERNAME'),
-            password = os.getenv('PASSWORD'),
-            port = os.getenv('PORT_ID')
+            host = HOSTNAME,
+            dbname = DATABASE,
+            user = USERNAME,
+            password = PASSWORD,
+            port = PORT_ID
         )
 
         # Cur stores return object from queries
@@ -32,6 +39,12 @@ def connect_database():
     except Exception as error:
         print(error)
         return None, None
+
+
+def sqlalchemy_connect():
+    uri = f"postgresql+psycopg2://{quote_plus(USERNAME)}:{quote_plus(PASSWORD)}@{HOSTNAME}:{PORT_ID}/{DATABASE}"
+    alchemyEngine = create_engine(uri)
+    return alchemyEngine
 
 
 def close_database_connection(conn, cur):
@@ -144,7 +157,7 @@ async def get_top_memes():
         return None, None
 
 
-async def main():
+async def newest_update():
     response, timestamp = await get_top_memes()
     memes_full_data = response["data"]["children"]
 
@@ -174,5 +187,5 @@ async def main():
 
 if __name__ == '__main__':
     print("Running crawler ...")
-    asyncio.run(main())
+    asyncio.run(newest_update())
 
