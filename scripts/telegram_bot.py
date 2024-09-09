@@ -20,7 +20,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Message when user uses /custom
 async def generate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    with open('generator.py') as file:
+    generator_dir = os.path.join(os.path.dirname(__file__), "generator.py")
+    with open(generator_dir) as file:
         exec(file.read())
     reports_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "reports")
     pdf_report_path = os.path.join(reports_dir, "report.pdf")

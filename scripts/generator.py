@@ -14,6 +14,8 @@ from weasyprint import HTML, CSS
 import pyemoji
 import colorcet as cc
 import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
+
 
 pd.options.mode.chained_assignment = None 
 
@@ -154,6 +156,8 @@ def plot_time_series_graph(df):
     chart_path = os.path.join(img_cache_dir, "chart.png")
     print("Saving chart ...")
     fig.savefig(chart_path, dpi=300, bbox_inches = "tight")
+    plt.clf()
+    plt.close()
     print("Saved")
 
 
