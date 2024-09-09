@@ -2,6 +2,7 @@ psycopg2-binary
 aiohttp
 python-dotenv
 sqlalchemy
+praw
 
 python-telegram-bot
 
