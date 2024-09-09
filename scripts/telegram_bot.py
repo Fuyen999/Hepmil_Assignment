@@ -21,7 +21,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Message when user uses /custom
 async def generate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    pdf_report_path = await generate_pdf_report()
+    pdf_report_path = generate_pdf_report()
     report = open(pdf_report_path, "rb")
     await update.message.reply_document(report, caption="Top 20 memes report")
 

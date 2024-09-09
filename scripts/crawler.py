@@ -1,10 +1,7 @@
-import aiohttp
-import asyncio
 from dotenv import dotenv_values
 import os
 import psycopg2
 from datetime import datetime, timedelta
-import requests.auth
 from sqlalchemy import create_engine
 from urllib.parse import quote_plus
 import praw

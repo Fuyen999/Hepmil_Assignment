@@ -160,7 +160,7 @@ def get_chart_html():
 
 
 async def generate_html_report():
-    await newest_update()
+    newest_update()
     engine = sqlalchemy_connect()
     top_memes_data = get_top_memes_data_from_db(engine)
     await cache_img(top_memes_data)
@@ -195,7 +195,7 @@ async def generate_html_report():
         f.write(html)
 
 
-async def generate_pdf_report():
+def generate_pdf_report():
     reports_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "reports")
     html_report_path = os.path.join(reports_dir, "report.html")
     pdf_report_path = os.path.join(reports_dir, "report.pdf")
@@ -205,7 +205,7 @@ async def generate_pdf_report():
         if os.path.exists(pdf_report_path) and modified_seconds_ago < 180:
             return pdf_report_path
 
-    await generate_html_report()
+    generate_html_report()
 
     css = CSS(string='''
         @page {size: A4; margin: 1cm;} 
