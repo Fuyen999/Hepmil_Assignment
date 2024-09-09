@@ -195,7 +195,7 @@ async def generate_html_report():
         f.write(html)
 
 
-def generate_pdf_report():
+async def generate_pdf_report():
     reports_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "reports")
     html_report_path = os.path.join(reports_dir, "report.html")
     pdf_report_path = os.path.join(reports_dir, "report.pdf")
@@ -205,7 +205,7 @@ def generate_pdf_report():
         if os.path.exists(pdf_report_path) and modified_seconds_ago < 180:
             return pdf_report_path
 
-    generate_html_report()
+    await generate_html_report()
 
     css = CSS(string='''
         @page {size: A4; margin: 1cm;} 
