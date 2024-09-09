@@ -211,7 +211,7 @@ async def generate_pdf_report():
     if os.path.exists(html_report_path):
         modified_seconds_ago = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(html_report_path))).total_seconds()
         if os.path.exists(pdf_report_path) and modified_seconds_ago < 1:
-            return
+            return pdf_report_path
 
     else: 
         await generate_html_report()
@@ -225,6 +225,7 @@ async def generate_pdf_report():
         print("Generating pdf report ...")
         HTML(html_report_path).write_pdf(pdf_report_path, stylesheets=[css])
         print("Finished generation")
+        return pdf_report_path
     
 
 if __name__ == '__main__':

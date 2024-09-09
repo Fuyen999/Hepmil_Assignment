@@ -3,6 +3,7 @@ import os
 from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from generator import generate_pdf_report
 
 dotenv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
 config = dotenv_values(dotenv_path)
@@ -20,11 +21,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Message when user uses /custom
 async def generate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    generator_dir = os.path.join(os.path.dirname(__file__), "generator.py")
-    with open(generator_dir) as file:
-        exec(file.read())
-    reports_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "reports")
-    pdf_report_path = os.path.join(reports_dir, "report.pdf")
+    pdf_report_path = await generate_pdf_report()
     report = open(pdf_report_path, "rb")
     await update.message.reply_document(report, caption="Top 20 memes report")
 
