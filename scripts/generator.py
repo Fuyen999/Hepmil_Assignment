@@ -138,7 +138,7 @@ def get_upvote_time_series_of_top_memes(engine):
 
 def plot_time_series_graph(df):
     df["net votes"] = df["upvotes"] - df["downvotes"]
-    df_title_sorted_by_votes = df[df["crawled_at"] == df["crawled_at"].max()].sort_values("net votes", ascending=False).drop_duplicates()["title"]
+    df_title_sorted_by_votes = df[df["crawled_at"] == df["crawled_at"].max()].sort_values("net votes", ascending=False).drop_duplicates(subset=["title"])["title"]
     palette = sb.color_palette(cc.glasbey, n_colors=20)
     print("Plotting chart ...")
     lineplot = sb.lineplot(df, x="crawled_at", y="net votes", hue="title", hue_order=df_title_sorted_by_votes, palette=palette)
@@ -205,7 +205,7 @@ async def generate_pdf_report():
     
     if os.path.exists(html_report_path):
         modified_seconds_ago = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(html_report_path))).total_seconds()
-        if os.path.exists(pdf_report_path) and modified_seconds_ago < 180:
+        if os.path.exists(pdf_report_path) and modified_seconds_ago < 300:
             return pdf_report_path
 
     await generate_html_report()

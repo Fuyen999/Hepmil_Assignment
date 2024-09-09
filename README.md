@@ -1,6 +1,7 @@
 # Hepmil_Assignment
 This is a repo for Hepmil's Software Engineer interview assignment
 
+## Tasks
 Kindly find the assignment over here:
 1. Create a webservice that crawls [https://www.reddit.com/r/memes/](https://www.reddit.com/r/memes/) and returns top 20 voted posts for the past 24 hours. Sorted by top voted post first, descending order. 
 2. Stores the crawled data into a database for historical tracking and future data visualization.
@@ -14,3 +15,6 @@ Level Marking Scheme:
 - Level 3: Clear documentation, structure, design at code and service design for data visualisation.  
 - Level 4: Able to provide explain mining methodologies and frameworks used.
 - Level 5: Abe to showcase actionable insights after generating the report.
+
+## Project Description
+
