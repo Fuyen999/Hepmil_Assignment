@@ -213,19 +213,18 @@ async def generate_pdf_report():
         if os.path.exists(pdf_report_path) and modified_seconds_ago < 1:
             return pdf_report_path
 
-    else: 
-        await generate_html_report()
+    await generate_html_report()
 
-        css = CSS(string='''
-            @page {size: A4; margin: 1cm;} 
-            .chart {width: 100%;}
-            th {text-align: center; border: 1px solid black;}
-            td {border: 1px solid black;}
-            ''')
-        print("Generating pdf report ...")
-        HTML(html_report_path).write_pdf(pdf_report_path, stylesheets=[css])
-        print("Finished generation")
-        return pdf_report_path
+    css = CSS(string='''
+        @page {size: A4; margin: 1cm;} 
+        .chart {width: 100%;}
+        th {text-align: center; border: 1px solid black;}
+        td {border: 1px solid black;}
+        ''')
+    print("Generating pdf report ...")
+    HTML(html_report_path).write_pdf(pdf_report_path, stylesheets=[css])
+    print("Finished generation")
+    return pdf_report_path
     
 
 if __name__ == '__main__':
