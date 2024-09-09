@@ -140,6 +140,7 @@ def plot_time_series_graph(df):
     df["net votes"] = df["upvotes"] - df["downvotes"]
     df_title_sorted_by_votes = df[df["crawled_at"] == df["crawled_at"].max()].sort_values("net votes", ascending=False).drop_duplicates()["title"]
     palette = sb.color_palette(cc.glasbey, n_colors=20)
+    print("Plotting chart ...")
     lineplot = sb.lineplot(df, x="crawled_at", y="net votes", hue="title", hue_order=df_title_sorted_by_votes, palette=palette)
     lineplot.xaxis.set_major_formatter(mdates.DateFormatter('%b %-d, %H:%M:%S'))
     ylabels = [f'{x}k' for x in lineplot.get_yticks()/1000]
@@ -150,7 +151,9 @@ def plot_time_series_graph(df):
     fig = lineplot.get_figure()
     img_cache_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "img_cache")
     chart_path = os.path.join(img_cache_dir, "chart.png")
-    fig.savefig(chart_path, dpi=300, bbox_inches = "tight")
+    print("Saving chart ...")
+    # fig.savefig(chart_path, dpi=300, bbox_inches = "tight")
+    print("Saved")
 
 
 def get_chart_html():
