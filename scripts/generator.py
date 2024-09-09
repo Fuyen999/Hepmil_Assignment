@@ -1,6 +1,6 @@
 import pandas as pd
 import seaborn as sb
-from crawler import *
+from crawler import newest_update, sqlalchemy_connect
 import os
 import aiofiles
 import aiohttp
@@ -152,7 +152,7 @@ def plot_time_series_graph(df):
     img_cache_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "img_cache")
     chart_path = os.path.join(img_cache_dir, "chart.png")
     print("Saving chart ...")
-    # fig.savefig(chart_path, dpi=300, bbox_inches = "tight")
+    fig.savefig(chart_path, dpi=300, bbox_inches = "tight")
     print("Saved")
 
 
@@ -187,7 +187,7 @@ async def generate_html_report():
         "meme_table" : table_html
     }
 
-    print("Generating report...")
+    print("Generating html report...")
     html = template.render(**kwargs)
 
     reports_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "reports")
@@ -216,7 +216,9 @@ async def generate_pdf_report():
         th {text-align: center; border: 1px solid black;}
         td {border: 1px solid black;}
         ''')
+    print("Generating pdf report ...")
     HTML(html_report_path).write_pdf(pdf_report_path, stylesheets=[css])
+    print("Finished generation")
     return pdf_report_path
     
 
