@@ -13,6 +13,7 @@ from datetime import datetime
 from weasyprint import HTML, CSS
 import pyemoji
 import colorcet as cc
+import matplotlib.dates as mdates
 
 pd.options.mode.chained_assignment = None 
 
@@ -137,12 +138,11 @@ def get_upvote_time_series_of_top_memes(engine):
 
 def plot_time_series_graph(df):
     df["net votes"] = df["upvotes"] - df["downvotes"]
-    df_title_sorted_by_votes = df[df["crawled_at"] == df["crawled_at"].max()].sort_values("net votes", ascending=False)["title"]
+    df_title_sorted_by_votes = df[df["crawled_at"] == df["crawled_at"].max()].sort_values("net votes", ascending=False).drop_duplicates()["title"]
     palette = sb.color_palette(cc.glasbey, n_colors=20)
     lineplot = sb.lineplot(df, x="crawled_at", y="net votes", hue="title", hue_order=df_title_sorted_by_votes, palette=palette)
-    xlabels = df["crawled_at"].dt.strftime("%b %-d, %-I%p")
+    lineplot.xaxis.set_major_formatter(mdates.DateFormatter('%b %-d, %H:%M:%S'))
     ylabels = [f'{x}k' for x in lineplot.get_yticks()/1000]
-    lineplot.set_xticklabels(xlabels)
     lineplot.tick_params(axis='x', labelrotation=45)
     lineplot.set_yticklabels(ylabels)
     lineplot.legend(title='Meme Title', loc='center left', bbox_to_anchor=(1.05, 0.5), ncol=1)
@@ -216,7 +216,6 @@ async def generate_pdf_report():
     HTML(html_report_path).write_pdf(pdf_report_path, stylesheets=[css])
     return pdf_report_path
     
-
 
 if __name__ == '__main__':
     asyncio.run(generate_pdf_report())

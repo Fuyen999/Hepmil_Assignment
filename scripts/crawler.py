@@ -1,10 +1,11 @@
+import asyncio
 from dotenv import dotenv_values
 import os
 import psycopg2
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from urllib.parse import quote_plus
-import praw
+import asyncpraw
 
 TOP_N_MEME = 20
 
@@ -140,8 +141,8 @@ def delete_outdated_data(cur, conn):
         return None, None
 
 
-def get_top_memes():
-    reddit = praw.Reddit(
+async def get_top_memes():
+    reddit = asyncpraw.Reddit(
         client_id = CLIENT_ID,
         client_secret = CLIENT_SECRET,
         user_agent = "hepmil by u/ssamu_iz",
@@ -149,15 +150,16 @@ def get_top_memes():
         password = REDDIT_PASSWORD
     )
 
-    subreddit = reddit.subreddit("memes")
-    top_posts = subreddit.top(time_filter="day", limit=TOP_N_MEME)
+    subreddit = await reddit.subreddit("memes")
     memes_full_data = []
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     fields = ("name", "title", "author_fullname", "url", "thumbnail", "ups", "downs")
-    for post in top_posts:
+    async for post in subreddit.top(time_filter="day", limit=TOP_N_MEME):
         to_dict = vars(post)
         sub_dict = {field:to_dict[field] for field in fields}
         memes_full_data.append(sub_dict)
+    
+    await reddit.close()
     
     return memes_full_data, timestamp
 
@@ -182,11 +184,11 @@ def get_top_memes():
     #     return None, None
 
 
-def newest_update():
+async def newest_update():
     # response, timestamp = get_top_memes()
     # memes_full_data = response["data"]["children"]
 
-    memes_full_data, timestamp = get_top_memes()
+    memes_full_data, timestamp = await get_top_memes()
 
     # memes_data_list = [[
     #     meme["data"]["name"],
@@ -229,5 +231,5 @@ def newest_update():
 
 if __name__ == '__main__':
     print("Running crawler ...")
-    newest_update()
+    asyncio.run(newest_update())
 
