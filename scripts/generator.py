@@ -16,7 +16,7 @@ import colorcet as cc
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 
-
+REGENERATE_AFTER_SECONDS = 1
 pd.options.mode.chained_assignment = None 
 
 def get_top_memes_data_from_db(engine):
@@ -67,6 +67,13 @@ async def cache_img(df):
             os.remove(os.path.join(img_cache_dir, img))
 
 
+async def connect_database_and_cache_images():
+    engine = sqlalchemy_connect()
+    top_memes_data = get_top_memes_data_from_db(engine)
+    await cache_img(top_memes_data)
+    return engine, top_memes_data
+
+
 def get_full_img_path(df):
     name = f"{df.iloc[0]}.{df.iloc[1].rsplit(".", 1)[-1].split("?", 1)[0]}"
     img_cache_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "img_cache")
@@ -104,7 +111,7 @@ def url_formatter(string):
 def get_df_for_display(old_df):
     df = old_df.copy()
     df["net votes"] = df["upvotes"] - df["downvotes"]
-    df = df.sort_values("net votes", ascending=False)
+    df = df.sort_values("net votes", ascending=False, ignore_index=True)
     df["title"] = df.title.map(lambda title: format_emoji(title))
     df["url"] = df.url.map(lambda url: url_formatter(url))
     df["img_path"] = df[["name", "thumbnail_url"]].apply(get_full_img_path, axis=1)
@@ -161,20 +168,37 @@ def plot_time_series_graph(df):
     print("Saved")
 
 
+def fetch_data_and_plot_graph(engine):
+    time_series_data = get_upvote_time_series_of_top_memes(engine)
+    plot_time_series_graph(time_series_data)
+
+
 def get_chart_html():
     img_cache_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "img_cache")
     chart_path = os.path.join(img_cache_dir, "chart.png")
     return f'<img class="chart" src="{chart_path}">'
 
 
-async def generate_html_report():
-    await newest_update()
-    engine = sqlalchemy_connect()
-    top_memes_data = get_top_memes_data_from_db(engine)
-    await cache_img(top_memes_data)
-    time_series_data = get_upvote_time_series_of_top_memes(engine)
+def regeneration_check(seconds):
+    print("Checking if file needs to be regenerated")
+    reports_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "reports")
+    html_report_path = os.path.join(reports_dir, "report.html")
+    pdf_report_path = os.path.join(reports_dir, "report.pdf")
     
-    plot_time_series_graph(time_series_data)
+    if os.path.exists(html_report_path):
+        modified_seconds_ago = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(html_report_path))).total_seconds()
+        if os.path.exists(pdf_report_path) and modified_seconds_ago < seconds:
+            return pdf_report_path
+    
+    return None
+
+
+async def get_newest_update():
+    timestamp = await newest_update()
+    return timestamp
+
+
+def generate_html_report(top_memes_data, timestamp):
     table_html = get_df_for_display(top_memes_data)
     chart_html = get_chart_html()
     
@@ -182,7 +206,6 @@ async def generate_html_report():
     env = Environment(loader=FileSystemLoader(templates_dir))
     template = env.get_template("report_template.html")
 
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     kwargs = {
         "page_title_text" : "Meme Report",
         "title_text" : "Top 20 memes of r/memes in the past 24 hours",
@@ -201,20 +224,12 @@ async def generate_html_report():
     html_report_path = os.path.join(reports_dir, "report.html")
     with open(html_report_path, 'w') as f:
         f.write(html)
+    return html_report_path
 
 
-async def generate_pdf_report():
+def generate_pdf_report(html_report_path):
     reports_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "reports")
-    html_report_path = os.path.join(reports_dir, "report.html")
     pdf_report_path = os.path.join(reports_dir, "report.pdf")
-    
-    if os.path.exists(html_report_path):
-        modified_seconds_ago = (datetime.now() - datetime.fromtimestamp(os.path.getmtime(html_report_path))).total_seconds()
-        if os.path.exists(pdf_report_path) and modified_seconds_ago < 1:
-            return pdf_report_path
-
-    await generate_html_report()
-
     css = CSS(string='''
         @page {size: A4; margin: 1cm;} 
         .chart {width: 100%;}
@@ -225,8 +240,19 @@ async def generate_pdf_report():
     HTML(html_report_path).write_pdf(pdf_report_path, stylesheets=[css])
     print("Finished generation")
     return pdf_report_path
-    
+
+
+async def main():
+    pdf_report_path = regeneration_check(REGENERATE_AFTER_SECONDS)
+    if pdf_report_path is None:
+        timestamp = await get_newest_update()
+        engine, top_memes_data = await connect_database_and_cache_images()
+        fetch_data_and_plot_graph(engine)
+        html_report_path = generate_html_report(top_memes_data, timestamp)
+        pdf_report_path = generate_pdf_report(html_report_path)
+    return pdf_report_path
+
 
 if __name__ == '__main__':
-    asyncio.run(generate_pdf_report())
+    asyncio.run(main())
 

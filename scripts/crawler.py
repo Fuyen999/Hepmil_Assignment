@@ -228,6 +228,8 @@ async def newest_update():
 
     close_database_connection(cur, conn)
 
+    return timestamp
+
 
 if __name__ == '__main__':
     print("Running crawler ...")

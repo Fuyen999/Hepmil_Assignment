@@ -3,12 +3,13 @@ import os
 from dotenv import dotenv_values
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-from generator import generate_pdf_report
+from generator import regeneration_check, get_newest_update, connect_database_and_cache_images, fetch_data_and_plot_graph, generate_html_report, generate_pdf_report
 
 dotenv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
 config = dotenv_values(dotenv_path)
 TOKEN: Final = config['BOT_TOKEN']
 BOT_USERNAME: Final = config['BOT_USERNAME']
+REGENERATE_AFTER_SECONDS = 1
 
 ## Commands
 # Message when user press start button (when starting the bot)
@@ -21,7 +22,22 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Message when user uses /custom
 async def generate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    pdf_report_path = await generate_pdf_report()
+    pdf_report_path = regeneration_check(REGENERATE_AFTER_SECONDS)
+    if pdf_report_path is None:
+        await update.message.reply_text('Fetching newest data ...')
+        timestamp = await get_newest_update()
+
+        await update.message.reply_text('Fetching images ...')
+        engine, top_memes_data = await connect_database_and_cache_images()
+
+        await update.message.reply_text('Plotting graph ...')
+        fetch_data_and_plot_graph(engine)
+
+        await update.message.reply_text('Generating report ...')
+        html_report_path = generate_html_report(top_memes_data, timestamp)
+        pdf_report_path = generate_pdf_report(html_report_path)
+    
+    await update.message.reply_text('Sending ...')
     report = open(pdf_report_path, "rb")
     await update.message.reply_document(report, caption="Top 20 memes report")
 
