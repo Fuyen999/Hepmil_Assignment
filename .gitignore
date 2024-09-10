@@ -165,6 +165,7 @@ img_cache/*
 !img_cache/nsfw.jpg
 !img_cache/default.jpg
 
+~$*.pptx
 
 reports/
 .DS_Store

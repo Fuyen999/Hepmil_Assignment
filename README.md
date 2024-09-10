@@ -17,4 +17,26 @@ Level Marking Scheme:
 - Level 5: Abe to showcase actionable insights after generating the report.
 
 ## Project Description
+The project directories are shown below
+```
+Hepmil_Assignment
+  ├── img_cache (stores images required in report)
+  ├── reports (stored generated report)
+  ├── scripts
+  │     ├── crawler.py (fetch data from reddit API)
+  │     ├── generator.py (generates HTML and PDF reports)
+  │     └── telegram_bot.py (telegram bot implementation)
+  ├── templates (stores HTML report template)
+  ├── presentation deck.pptx
+  └── requirements.txt
+```
 
+
+## Setting up
+- First, set up a python environment for this project (using conda, virtualenv etc.)
+- Install dependencies in the environment by:
+```
+pip install -r requirements.txt
+```
+- Install weasyprint on the machine, following [weasyprint documentation](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#installation)
+- Run `telegram_bot.py`. I ran it on deployed machine as systemd service.
